@@ -80,7 +80,7 @@ if [ "$CIRCLE_BRANCH_SLUG" != "master" ] && [ "$CIRCLE_BRANCH_SLUG" != "dev" ] &
   export previous_commit=($(git log --format="%H" -n 2))
   export previous_commit="${previous_commit[1]}"
   #Save the body of previous comment for reuse
-  curl https://api.github.com/repos/pantheon-systems/documentation/commits/$previous_commit/comments?access_token=$GITHUB_TOKEN  > comment.json;
+  # curl https://api.github.com/repos/pantheon-systems/documentation/commits/$previous_commit/comments?access_token=$GITHUB_TOKEN  > comment.json;
   export last_comment_id=`cat comment.json | jq ".[0].id"`
   export existing_comment_body=`cat comment.json | jq ".[0].body"`
   export null="null"
@@ -95,7 +95,7 @@ if [ "$CIRCLE_BRANCH_SLUG" != "master" ] && [ "$CIRCLE_BRANCH_SLUG" != "dev" ] &
     sed -i 's/\"//g' comment.txt
     export comment=`cat comment.txt`
     #Delete first comment so the PR isn't overpopulated with bot comments
-    curl -X DELETE https://api.github.com/repos/pantheon-systems/documentation/comments/$last_comment_id?access_token=$GITHUB_TOKEN
+    # curl -X DELETE https://api.github.com/repos/pantheon-systems/documentation/comments/$last_comment_id?access_token=$GITHUB_TOKEN
   fi
 
   #Identify modified files from new commit
