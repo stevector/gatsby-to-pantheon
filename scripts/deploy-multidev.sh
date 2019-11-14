@@ -144,8 +144,8 @@ if [ "$CIRCLE_BRANCH_SLUG" != "master" ] && [ "$CIRCLE_BRANCH_SLUG" != "dev" ] &
 
   #Create new comment on new commit, so when PR is open only one comment is present
   export comment=`cat comment.txt`
-  curl -d '{ "body": "'$comment'" }' -X POST https://api.github.com/repos/pantheon-systems/documentation/commits/$CIRCLE_SHA1/comments?access_token=$GITHUB_TOKEN
+  # curl -d '{ "body": "'$comment'" }' -X POST https://api.github.com/repos/pantheon-systems/documentation/commits/$CIRCLE_SHA1/comments?access_token=$GITHUB_TOKEN
 
   printf "Clear cache on multidev env. \n"
-  terminus env:cc static-docs.$normalize_branch
+  #  terminus env:cc static-docs.$normalize_branch
 fi
