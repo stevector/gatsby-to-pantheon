@@ -32,23 +32,23 @@ if [ "$CIRCLE_BRANCH_SLUG" != "master" ] && [ "$CIRCLE_BRANCH_SLUG" != "dev" ] &
 
 
   printf "Write existing environments for the static docs site to a text file \n"
-  terminus env:list --format list --field=ID static-docs > ./env_list.txt
+  terminus env:list --format list --field=ID $STATIC_DOCS_UUID > ./env_list.txt
 
   printf "Check env_list.txt, create environment if one does not already exist \n"
   if grep -Fxq "$normalize_branch" ./env_list.txt; then
     echo "Existing environment found for $normalize_branch"
     # Get the environment hostname and URL
-    export url=`terminus env:view static-docs.$normalize_branch --print`
+    export url=`terminus env:view $STATIC_DOCS_UUID.$normalize_branch --print`
     export url=https://${url:7: -1}
     export hostname=${url:8: -1}
     export docs_url=${url}/docs
   else
     printf "Creating multidev environment... \n"
-    terminus multidev:create static-docs.dev $normalize_branch
+    terminus multidev:create $STATIC_DOCS_UUID.dev $normalize_branch
 
     # Get the environment hostname and identify deployment URL
     printf "Identifying environment hostname... \n"
-    export url=`terminus env:view static-docs.$normalize_branch --print`
+    export url=`terminus env:view $STATIC_DOCS_UUID.$normalize_branch --print`
     export url=https://${url:7: -1}
     export hostname=${url:8}
     export docs_url=${url}/docs
@@ -147,5 +147,5 @@ if [ "$CIRCLE_BRANCH_SLUG" != "master" ] && [ "$CIRCLE_BRANCH_SLUG" != "dev" ] &
   # curl -d '{ "body": "'$comment'" }' -X POST https://api.github.com/repos/pantheon-systems/documentation/commits/$CIRCLE_SHA1/comments?access_token=$GITHUB_TOKEN
 
   printf "Clear cache on multidev env. \n"
-  #  terminus env:cc static-docs.$normalize_branch
+  #  terminus env:cc $STATIC_DOCS_UUID.$normalize_branch
 fi
