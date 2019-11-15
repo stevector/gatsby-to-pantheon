@@ -31,10 +31,10 @@ fi
 
 
 #=====================================================#
-# Delete Multidev environment from static-docs site   #
+# Delete Multidev environment from $STATIC_DOCS_UUID site   #
 #=====================================================#
-# Identify existing environments for the static-docs site
-terminus env:list --format list --field=ID static-docs > ./env_list.txt
+# Identify existing environments for the $STATIC_DOCS_UUID site
+terminus env:list --format list --field=ID $STATIC_DOCS_UUID > ./env_list.txt
 echo "Existing environments:" && cat env_list.txt
 # Create array of existing environments on Static Docs
 getExistingTerminusEnvs() {
@@ -69,7 +69,7 @@ getMergedBranchMultidevName "merged-branches-clean.txt"
 merged_branch=" ${merged_branch_multidev_names[*]} "
 for env in ${existing_terminus_envs[@]}; do
   if [[ $merged_branch =~ " $env " ]] && [ "$env" != "sculpin" ] ; then
-    terminus multidev:delete static-docs.$env --delete-branch --yes
+    terminus multidev:delete $STATIC_DOCS_UUID.$env --delete-branch --yes
   fi
 done
 
