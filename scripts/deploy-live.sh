@@ -84,9 +84,11 @@ getMergedBranch() {
 getMergedBranch "merged-branches-clean.txt"
 
 # Delete merged branches from GH Repo
+# Commenting out for prototype work to avoid one more permissions set up.
+
+exit 0;
   for branch in ${merged_branch_array[@]}; do
     if [ "$branch" != "sculpin" ] ; then
-    # Commenting out for prototype work to avoid one more permissions set up.
-    # git push origin --delete "$branch"
+      git push origin --delete "$branch"
     fi
   done
