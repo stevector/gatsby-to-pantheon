@@ -20,13 +20,8 @@ Read [our Style Guide](https://pantheon.io/docs/style-guide/) for our guidelines
 ## Local Installation
 
 ### Prerequisites
- - MacOS or Linux system (untested with Bash on Windows)
- - [Node.js](https://nodejs.org/en/)
- - Gatsby CLI:
+ - [Lando](https://lando.dev/)
 
-   ```bash
-   npm install -g gatsby-cli
-   ```
 
 ### Get the Code
 
@@ -42,12 +37,6 @@ Or
 git@github.com:pantheon-systems/documentation.git
 ```
 
-### Install
-
-```
-cd documentation/gatsby
-npm ci
-```
 #### GitHub Token
 We use the [gatsby-remark-embed-snippet](https://github.com/gatsbyjs/gatsby/tree/master/packages/gatsby-remark-embed-snippet) to use files from GitHub in our docs. Before you can build a local development site, you need to provide a GitHub token to the environment:
 
@@ -61,14 +50,14 @@ We use the [gatsby-remark-embed-snippet](https://github.com/gatsbyjs/gatsby/tree
    GITHUB_API=$TOKENHASH
    ```
 
-### Run
+### Install and Run
 
 ```
-cd documentation/gatsby
-gatsby develop
+cd documentation
+lando start
 ```
 
-You can view the local environment at `localhost:8000/`. Updates to docs are automatically refreshed in the browser.
+You can view the local environment at `http://pantheon-docs.lndo.site `. Updates to docs are automatically refreshed in the browser.
 
 
 ## Testing
