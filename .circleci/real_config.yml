@@ -1,0 +1,167 @@
+version: 2.1
+orbs:
+  queue: eddiewebb/queue@volatile
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.2-cli-node-browsers
+    working_directory: ~/build
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v2.4-always-
+            - npm-v2.7-{{ checksum "gatsby/package-lock.json" }}
+      - run:
+          name: Install Terminus
+          command: |
+            php scripts/terminus-installer.php
+      - run:
+          name: Install Gatsby
+          command: |
+            cd ~/build/gatsby
+            npm ci
+      - run:
+          name: Import Tokens
+          command: |
+            cd ~/build/gatsby
+            touch .env.production
+            echo "GITHUB_API=$GITHUB_TOKEN" >> .env.production
+            echo "SEGMENT_KEY=$SEGMENT_KEY" >> .env.production
+      - run:
+          name: Update Terminus data files
+          command: |
+            cd ~/build
+            bash ./scripts/update-terminus-commands.sh
+      - run:
+          name: Gatsby Build
+          command: |
+            cd ~/build/gatsby
+            ./node_modules/gatsby/node_modules/.bin/gatsby build --prefix-paths
+      - run:
+          name: Remove empty directories
+          command: |
+            find ~/build/gatsby/public -type d -empty -delete
+      - run:
+          name: Check for merge conflicts
+          command: |
+            scripts/merge_conflicts.sh
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./
+
+  test:
+    docker:
+      - image: circleci/php:7.2-cli-node-browsers
+    working_directory: ~/build
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Serve Gatsby
+          command: |
+            cd ~/build/gatsby
+            ./node_modules/gatsby/node_modules/.bin/gatsby serve --prefix-paths
+          background: true
+      - run:
+          name: Wait...
+          command: |
+            dockerize -wait tcp://localhost:9000
+      - run:
+          name: Test links
+          command: |
+            cd ~/build
+            bash ./scripts/link-checker.sh
+      - save_cache:
+          key: npm-v2.7-{{ checksum "gatsby/package-lock.json" }}
+          paths:
+            - ~/build/gatsby/package-lock.json
+            - ~/build/gatsby/node_modules
+      - save_cache:
+          key: v2.4-always-{{ epoch }}
+          paths:
+            - ~/build/gatsby/public
+            - ~/build/gatsby/.cache
+
+  preview:
+    docker:
+      - image: circleci/php:7.2-cli-node-browsers
+    working_directory: ~/build
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install rsync
+          command: |
+            sudo apt install -y rsync
+      - run:
+          name: Install Terminus
+          command: |
+            php scripts/terminus-installer.php
+      - run:
+         name: Deploy Multidev environment
+         command: |
+           bash ./scripts/deploy-multidev.sh
+         no_output_timeout: 15m
+      - store_artifacts:
+         path: ~/build/multidev-log.txt
+         destination: multidev-log.txt
+
+  deploy:
+    docker:
+      - image: circleci/php:7.2-cli-node-browsers
+    working_directory: ~/build
+    steps:
+      - queue/until_front_of_line:
+          time: '15'
+      - run: echo "Waiting for other deployments to master to complete"
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install rsync
+          command: |
+            sudo apt install -y rsync
+      - run:
+          name: Install Terminus
+          command: |
+            php scripts/terminus-installer.php
+      - deploy:
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              scripts/deploy-live.sh
+            fi
+          no_output_timeout: 15m
+      - store_artifacts:
+         path: ~/build/deployment-log.txt
+         destination: deployment-log.txt
+
+workflows:
+  version: 2.1
+  build-test-preview-and-deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - preview:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - build
+      - deploy:
+          filters:
+            branches:
+              only: master
+          requires:
+            - test
+
+
+# Below is CircleCI 1.0 Config Syntax that is still supported on CircleCI 2.0
+experimental:
+  notify:
+    branches:
+      only:
+        - master
