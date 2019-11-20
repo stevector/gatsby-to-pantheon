@@ -19,6 +19,7 @@ services:
 tooling:
   gatsby:
     service: gatsby
+    cmd: "cd /app/gatsby && gatsby"
   firebase:
     service: gatsby
   npm:
