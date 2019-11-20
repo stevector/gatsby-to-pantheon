@@ -43,12 +43,45 @@ jobs:
           name: Firebase Deploy
           command: ~/build/gatsby/node_modules/.bin/firebase deploy --token "$FIREBASE_TOKEN"
 
+  preview:
+    docker:
+      - image: google/cloud-sdk
+        environment:
+          STORAGE_BUCKET: featuredemo-lorem
+    working_directory: ~/build
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Login to gcloud
+          command: |
+            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
+      - run:
+          name: list files
+          command: ls ~/build/gatsby/public
+      - run:
+          name: Deploy preview to GCP Storage
+          command: | 
+            echo "Copying build to Storage"
+            gsutil defacl ch -u AllUsers:READER gs://$STORAGE_BUCKET
+            gsutil rsync -R ~/build/gatsby/public gs://$STORAGE_BUCKET
+            gsutil setmeta -h "Cache-Control:private, max-age=0, no-transform" \
+            gs://$STORAGE_BUCKET/*.js
+
 workflows:
   version: 2
   build-test-preview-and-deploy:
     jobs:
       - build
       - deploy:
+          filters:
+            branches:
+              ignore: master
+          requires:
+            - build
+      - preview:
           filters:
             branches:
               only: master
