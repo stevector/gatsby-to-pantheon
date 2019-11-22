@@ -9,10 +9,8 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            # Find a cache corresponding to this specific package-lock.json
-            - v1-npm-deps-{{ checksum "gatsby/package-lock.json" }}
-            # Fallback cache to be used
-            - v1-npm-deps-
+            - v2.4-always-
+            - npm-v2.7-{{ checksum "gatsby/package-lock.json" }}
       - run:
           name: Install Dependencies
           command: |
@@ -32,6 +30,39 @@ jobs:
           paths:
             - ./
 
+  test:
+    docker:
+      - image: circleci/node:10
+    working_directory: ~/build
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Serve Gatsby
+          command: |
+            cd ~/build/gatsby
+            ./node_modules/gatsby/node_modules/.bin/gatsby serve 
+          background: true
+      - run:
+          name: Wait...
+          command: |
+            dockerize -wait tcp://localhost:9000
+      - run:
+          name: Test links
+          command: |
+            cd ~/build
+            bash ./scripts/link-checker.sh
+      - save_cache:
+          key: npm-v2.7-{{ checksum "gatsby/package-lock.json" }}
+          paths:
+            - ~/build/gatsby/package-lock.json
+            - ~/build/gatsby/node_modules
+      - save_cache:
+          key: v2.4-always-{{ epoch }}
+          paths:
+            - ~/build/gatsby/public
+            - ~/build/gatsby/.cache
+
   deploy:
     docker:
       - image: circleci/node:10
@@ -47,7 +78,7 @@ jobs:
     docker:
       - image: google/cloud-sdk
         environment:
-          STORAGE_BUCKET: featuredemo-lorem
+          STORAGE_BUCKET: pr-000.artifactor.io
     working_directory: ~/build
     steps:
       - attach_workspace:
@@ -71,10 +102,13 @@ jobs:
             gs://$STORAGE_BUCKET/*.js
 
 workflows:
-  version: 2
+  version: 2.1
   build-test-preview-and-deploy:
     jobs:
       - build
+      - test:
+          requires:
+            - build
       - deploy:
           filters:
             branches:
