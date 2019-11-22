@@ -5,11 +5,9 @@ tags: [manage]
 categories: []
 ---
 
-> New text here
-
 When a person with access to your site(s) on the platform leaves the company or project, it is important to immediately remove them from the team so that they no longer have access to make changes to your site.
 
-After a user leaves, we recommend you:
+After a user leaves, we recommend that you:
 
 - Delete or block the user's account in [Drupal](https://www.drupal.org/node/627158) or [WordPress](https://codex.wordpress.org/Users_Users_SubPanel).
 - Remove the user from the team and/or organization in the Pantheon Dashboard.
