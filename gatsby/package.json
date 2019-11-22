@@ -58,6 +58,7 @@
     "tocbot": "^4.8.1"
   },
   "devDependencies": {
+    "firebase-tools": "^7.8.1",
     "prettier": "^1.16.4"
   },
   "homepage": "https://github.com/gatsbyjs/gatsby-starter-blog#readme",
