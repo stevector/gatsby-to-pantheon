@@ -5,8 +5,6 @@ tags: [manage]
 categories: []
 ---
 
-> New text here
-
 When a person with access to your site(s) on the platform leaves the company or project, it is important to immediately remove them from the team so that they no longer have access to make changes to your site.
 
 After a user leaves, we recommend you:
