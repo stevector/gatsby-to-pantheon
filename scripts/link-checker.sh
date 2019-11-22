@@ -5,7 +5,7 @@ set -e
 
 echo "Checking for broken links.."
 
-if ./gatsby/node_modules/broken-link-checker/bin/blc -q -r -e -o http://localhost:9000/docs
+if ./gatsby/node_modules/broken-link-checker/bin/blc -q -r -e -o http://localhost:9000
 then
   echo "No broken internal links!"
 else
