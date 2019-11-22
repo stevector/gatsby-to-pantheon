@@ -96,10 +96,10 @@ jobs:
           name: Deploy preview to GCP Storage
           command: | 
             echo "Copying build to Storage"
-            gsutil defacl ch -u AllUsers:READER gs://$STORAGE_BUCKET
-            gsutil rsync -R ~/build/gatsby/public gs://$STORAGE_BUCKET
+            gsutil defacl ch -u AllUsers:READER gs://$CIRCLE_BRANCH.artifactor.io
+            gsutil rsync -R ~/build/gatsby/public gs://$CIRCLE_BRANCH.artifactor.io
             gsutil setmeta -h "Cache-Control:private, max-age=0, no-transform" \
-            gs://$STORAGE_BUCKET/*.js
+            gs://$CIRCLE_BRANCH.artifactor.io/*.js
 
 workflows:
   version: 2
